@@ -1,6 +1,0 @@
-import core
-
-core.main()
-
-
-
