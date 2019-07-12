@@ -1,0 +1,5 @@
+
+
+class UnexpectedStructures(Exception):
+    pass
+
