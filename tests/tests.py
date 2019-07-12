@@ -1,0 +1,6 @@
+import core
+
+core.main()
+
+
+
