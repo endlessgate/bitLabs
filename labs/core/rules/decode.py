@@ -34,7 +34,7 @@ def decode_payload(fl, data, pack):
         length = data[0] - 27
         value = data[1: 33].rsplit(b'\x00').pop()
         if len(value) != length:
-            raise TypeError
+            raise ValueError("Payload values length {}, got length {}".format(33, len(value)))
         attr_slots.append(
             value
         )
