@@ -22,7 +22,7 @@ def decode_prefix(data):
     if data[0] > 216:
         length = data[0] - 216
         if length < 0:
-            raise TypeError
+            raise TypeError("Does not exists payload")
         return length, data[1:], len(data[1:])
     else:
         raise TypeError("Unexpected type {}".format(data[0]))
