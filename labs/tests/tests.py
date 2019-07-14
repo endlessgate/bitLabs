@@ -3,6 +3,8 @@ from labs.core.datastructures import (
     Transaction, Block, BlockHeader
 )
 
-core.main()
 
+if __name__ == '__main__':
+
+    core.main()
 

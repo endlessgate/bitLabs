@@ -1,8 +1,8 @@
 
-from labs.core.datastructures import Serializer
+from labs.core.datastructures import AtomicStructure
 
 
-class Transaction(Serializer):
+class Transaction(AtomicStructure):
 
     __slots__ = ('nonce',
                  'to',
@@ -12,6 +12,7 @@ class Transaction(Serializer):
                  'data',
                  'signature')
 
+    @property
     def hash(self):
-        pass
+        return ''
 

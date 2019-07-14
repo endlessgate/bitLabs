@@ -1,8 +1,17 @@
-from labs.core.datastructures import Serializer
+
+from labs.core.datastructures import AtomicStructure
 
 
-class Block(Serializer):
+class Block(AtomicStructure):
 
+    @property
+    def number(self):
+        return 0
+
+    @property
     def hash(self):
-        pass
+        return ''
+
+    def __repr__(self):
+        return 'Block({}@{})'.format(self.number, self.hash[2:10])
 

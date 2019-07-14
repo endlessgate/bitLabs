@@ -1,8 +1,8 @@
 
-from labs.core.datastructures import Serializer
+from labs.core.datastructures import AtomicStructure
 
 
-class BlockHeader(Serializer):
+class BlockHeader(AtomicStructure):
 
     __slots__ = ('previous_hash',
                  'base',
@@ -15,6 +15,10 @@ class BlockHeader(Serializer):
                  'cost_used',
                  'signature')
 
+    @property
     def hash(self):
-        pass
+        return ''
+
+    def __repr__(self):
+        return 'BlockHeader({}@{})'.format(self.number, self.hash[2:10])
 

@@ -1,11 +1,12 @@
 
 from copy import deepcopy
+from collections.abc import Sequence
 from abc import ABC, abstractmethod
-from labs.exceptions import UnexpectedStructures
-from labs.decorators import to_tuple
+from labs.exceptions import SerializationError
+from labs.core.utils import to_tuple
 
 
-class Serializer(ABC):
+class Serializer(Sequence):
     # base class for data-structures
     def __init__(self, *args, **kwargs):
         if kwargs:
@@ -14,9 +15,12 @@ class Serializer(ABC):
             data_space = args
 
         if len(self.__slots__) != len(data_space):
-            raise UnexpectedStructures("Expected args({}), "
-                                       "Got args({})".format(
-                                        len(self.__slots__), len(data_space)))
+            raise SerializationError("Expected args({}), "
+                                     "Got args({})".format(
+                                      len(self.__slots__), len(data_space)))
+
+        for attr, value in zip(self.__slots__, data_space):
+            setattr(self, attr, value)
 
     @to_tuple
     def _merge(self, args, kwargs):
@@ -34,7 +38,30 @@ class Serializer(ABC):
         class_kwargs = dict(**keep_space, **kwargs)
         return type(self)(**class_kwargs)
 
+    def serialize(self):
+        pass
+
+    @classmethod
+    def deserialize(cls, items):
+        pass
+
+    def __iter__(self):
+        for attr in self.__slots__:
+            yield getattr(self, attr)
+
+    def __getitem__(self, index):
+        return getattr(self, self.__slots__[index])
+
+    def __len__(self):
+        return len(self.__slots__)
+
+
+class AtomicStructure(Serializer, ABC):
+
+    @property
     @abstractmethod
     def hash(self):
-        raise NotImplementedError("data-structures: method not implement")
+        raise NotImplementedError
+
+
 
