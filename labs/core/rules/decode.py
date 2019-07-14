@@ -9,7 +9,7 @@ def decode(data, pack=None):
 
     fl, data, attrlen = decode_prefix(data)
     if attrlen != 33 * fl:
-        raise PayloadError('Payload not not enough {}'.format(data))
+        raise PayloadError('Payload not enough {}'.format(data))
 
     return decode_payload(fl, data, pack)
 
