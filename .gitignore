@@ -1,0 +1,12 @@
+# pytest
+.cache/
+.pytest_cache/
+
+dist
+build
+
+.DS_Store
+.DS_Store?
+
+.xml
+.iml
