@@ -1,5 +1,5 @@
 
-from labs.core.utils import is_bytes
+from labs.utils import is_bytes
 from labs.exceptions import DecodeError, PayloadError
 
 

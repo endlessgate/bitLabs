@@ -2,7 +2,7 @@
 import struct
 from labs.core.datastructures import Serializer, AtomicStructure
 from labs.exceptions import EncodeError
-from labs.core.utils import pad32
+from labs.utils import pad32
 
 
 def encode(obj):

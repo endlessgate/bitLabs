@@ -3,7 +3,7 @@ from copy import deepcopy
 from collections.abc import Sequence
 from abc import ABC, abstractmethod
 from labs.exceptions import SerializationError
-from labs.core.utils import to_tuple
+from labs.utils import to_tuple
 
 
 class Serializer(Sequence):
