@@ -2,6 +2,7 @@
 import struct
 from labs.core.datastructures import Serializer, AtomicStructure
 from labs.exceptions import EncodeError
+from labs.core.utils import pad32
 
 
 def encode(obj):
@@ -15,7 +16,7 @@ def _encode(data):
         payload = b''.join(_encode(field) for field in data)
         offset_type = 216    # obj
     elif isinstance(data, bytes):
-        payload = data.rjust(32, b'\x00')
+        payload = pad32(data)
         offset_type = 27    # data
 
     prefix = encode_prefix(len(data), offset_type)
