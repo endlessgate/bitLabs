@@ -22,3 +22,9 @@ from .convert import (
     int_from_big,
 )
 
+
+from .rules import (
+    encode,
+    decode,
+)
+
