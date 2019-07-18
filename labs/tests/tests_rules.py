@@ -1,5 +1,5 @@
 
-import labs.utils.serializer as rules
+import labs.utils.serialize as rules
 from labs.core.datastructures import AtomicStructure
 
 
