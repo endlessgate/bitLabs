@@ -1,8 +1,8 @@
 
-from labs.core.datastructures import AtomicStructure
+from labs.core.datastructures import DerivedBase
 
 
-class Transaction(AtomicStructure):
+class Transaction(DerivedBase):
 
     __slots__ = ('nonce',
                  'to',

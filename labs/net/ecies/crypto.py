@@ -17,7 +17,9 @@ def sha3_256_mac(key: bytes, data: bytes) -> bytes:
 
 
 def generate_random() -> ec.EllipticCurvePrivateKey:
-    return ec.generate_private_key(CURVE, default_backend())
+    r = ec.generate_private_key(CURVE, default_backend())
+
+    return
 
 
 for i in range(100000):

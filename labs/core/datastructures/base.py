@@ -56,7 +56,7 @@ class Serializer(Sequence):
         return len(self.__slots__)
 
 
-class AtomicStructure(Serializer, ABC):
+class DerivedBase(Serializer, ABC):
 
     @property
     @abstractmethod

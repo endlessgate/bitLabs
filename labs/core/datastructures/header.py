@@ -1,8 +1,8 @@
 
-from labs.core.datastructures import AtomicStructure
+from labs.core.datastructures import DerivedBase
 
 
-class BlockHeader(AtomicStructure):
+class BlockHeader(DerivedBase):
 
     __slots__ = ('previous_hash',
                  'base',

@@ -1,17 +1,28 @@
 
-from labs.core.datastructures import AtomicStructure
+from abc import (
+    ABC,
+    abstractmethod
+)
+
+from labs.core.datastructures import DerivedBase
 
 
-class Block(AtomicStructure):
+class BaseBlock(DerivedBase):
 
     @property
+    @abstractmethod
     def number(self):
-        return 0
+        """
+        Returns from block height
+        """
+        raise NotImplementedError
 
     @property
+    @abstractmethod
     def hash(self):
-        return ''
+        raise NotImplementedError
 
     def __repr__(self):
-        return 'Block({}@{})'.format(self.number, self.hash[2:10])
+        return 'Block(#{}, {})'.format(self.number, self.hash[2:10])
 
+print("Block(#1, 0xabedafe)")

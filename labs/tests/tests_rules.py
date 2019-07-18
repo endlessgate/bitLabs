@@ -1,5 +1,5 @@
 
-import labs.core.rules as rules
+import labs.utils.rules as rules
 from labs.core.datastructures import AtomicStructure
 
 
