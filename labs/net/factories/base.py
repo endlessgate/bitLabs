@@ -7,12 +7,12 @@ class BaseFactory(ABC):
 
     @property
     @abstractmethod
-    def nodeclass(self):
+    def node_class(self):
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def tunnelclass(self):
+    def tunnel_class(self):
         raise NotImplementedError
 
     @abstractmethod

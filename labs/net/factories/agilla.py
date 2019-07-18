@@ -5,11 +5,11 @@ from labs.net.factories import BaseFactory
 class AgillaFactory(BaseFactory):
 
     @property
-    def nodeclass(self):
+    def node_class(self):
         pass
 
     @property
-    def tunnelclass(self):
+    def tunnel_class(self):
         pass
 
     def build_node(self, **kwargs):
