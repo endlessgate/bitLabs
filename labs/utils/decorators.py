@@ -17,4 +17,5 @@ def change_returns_type(change_type: Callable[..., T]
 to_dict = change_returns_type(dict)
 to_tuple = change_returns_type(tuple)
 to_list = change_returns_type(list)
+to_set = change_returns_type(set)
 

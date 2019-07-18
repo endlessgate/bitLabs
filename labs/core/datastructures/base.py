@@ -14,7 +14,7 @@ class Serializer(Sequence):
         else:
             data_space = args
 
-        if len(self.__slots__) != len(data_space):
+        if len(self._meta.names) != len(data_space):
             raise SerializationError("Expected args({}), "
                                      "Got args({})".format(
                                       len(self.__slots__), len(data_space)))
@@ -38,8 +38,9 @@ class Serializer(Sequence):
         class_kwargs = dict(**keep_space, **kwargs)
         return type(self)(**class_kwargs)
 
-    def serialize(self):
-        pass
+    @classmethod
+    def serialize(cls, obj):
+        return cls._meta.types.serialize(obj)
 
     @classmethod
     def deserialize(cls, items):

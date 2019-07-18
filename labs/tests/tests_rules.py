@@ -1,5 +1,5 @@
 
-import labs.utils.rules as rules
+import labs.utils.serializer as rules
 from labs.core.datastructures import AtomicStructure
 
 
@@ -13,11 +13,11 @@ class TestCase(AtomicStructure):
 
 def tests_encode():
     tc = TestCase(name=b'mynames', hub=b'mytests')
-    return rules.encode(tc)
+    return serializer.encode(tc)
 
 
 def tests_decode(data: bytes):
-    tc = rules.decode(data, pack=TestCase)
+    tc = serializer.decode(data, pack=TestCase)
     return tc
 
 

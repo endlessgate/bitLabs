@@ -4,6 +4,10 @@ class SerializationError(Exception):
     pass
 
 
+class DeSerializationError(Exception):
+    pass
+
+
 class EncodeError(Exception):
     pass
 

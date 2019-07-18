@@ -3,6 +3,7 @@ from .decorators import (
     to_dict,
     to_list,
     to_tuple,
+    to_set,
 )
 
 from .checks import (
