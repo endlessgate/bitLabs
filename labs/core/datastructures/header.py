@@ -20,5 +20,5 @@ class BlockHeader(DerivedBase):
         return ''
 
     def __repr__(self):
-        return 'BlockHeader({}@{})'.format(self.number, self.hash[2:10])
+        return 'BlockHeader(#{}, {})'.format(self.number, self.hash[2:10])
 

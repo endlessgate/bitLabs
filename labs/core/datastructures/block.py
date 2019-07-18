@@ -7,7 +7,7 @@ from abc import (
 from labs.core.datastructures import DerivedBase
 
 
-class BaseBlock(DerivedBase):
+class BaseBlock(DerivedBase, ABC):
 
     @property
     @abstractmethod
