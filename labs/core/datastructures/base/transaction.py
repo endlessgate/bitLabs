@@ -31,6 +31,6 @@ class BaseTransaction(Serializer, ABC):
         return '{}.{}'.format(self.__class__.__name__, str(self))
 
     def __str__(self):
-        return 'Transaction(from:{}, )'.format(self.sender, self.hash[2:10])
+        return 'Transaction(from:{}, {})'.format(self.sender, self.hash[2:10])
 
 
