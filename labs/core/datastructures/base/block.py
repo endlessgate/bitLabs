@@ -4,10 +4,10 @@ from abc import (
     abstractmethod
 )
 
-from labs.core.datastructures import DerivedBase
+from labs.utils.serialize import Serializer
 
 
-class BaseBlock(DerivedBase, ABC):
+class BaseBlock(Serializer, ABC):
 
     @property
     @abstractmethod
@@ -23,5 +23,7 @@ class BaseBlock(DerivedBase, ABC):
         raise NotImplementedError
 
     def __repr__(self):
-        return 'Block(#{}, {})'.format(self.number, self.hash[2:10])
+        return '<{}.{}>'.format(self.__class__.__name__, str(self))
 
+    def __str__(self):
+        return 'Block(#{}, {})'.format(self.number, self.hash[2:10])

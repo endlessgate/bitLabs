@@ -1,12 +1,12 @@
 
 import struct
-from labs.core.datastructures import Serializer, DerivedBase
+from .serializer import Serializer
 from labs.exceptions import EncodeError
 from labs.utils import pad32
 
 
 def encode(obj):
-    if not isinstance(obj, DerivedBase):
+    if not isinstance(obj, Serializer):
         raise EncodeError('cannot encode object of {}'.format(type(obj).__name__))
     return _encode(obj)
 
