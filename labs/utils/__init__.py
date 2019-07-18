@@ -10,7 +10,15 @@ from .checks import (
     is_integer,
     is_str,
     is_strings,
+    bit_length,
 )
 
-from .pad import pad32
+from .pad import (
+    pad32,
+)
+
+from .convert import (
+    int_to_big,
+    int_from_big,
+)
 

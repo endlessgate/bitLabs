@@ -20,3 +20,9 @@ def is_str(value) -> bool:
 def is_strings(value) -> bool:
     return isinstance(value, types_strings)
 
+
+def bit_length(x: int):
+    return x.bit_length()
+
+
+
