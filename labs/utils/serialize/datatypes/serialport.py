@@ -1,7 +1,9 @@
 
 from labs.utils import to_list
-from labs.exceptions import SerializationError
-
+from labs.exceptions import (
+    SerializationError,
+    DeSerializationError
+)
 
 def has_serialize(obj):
     return hasattr(obj, 'serialize') and hasattr(obj, 'deserialize')
@@ -30,7 +32,7 @@ class SerialPort(list):
     @to_list
     def deserialize(self, obj):
         if len(self) != len(obj):
-            raise SerializationError('object length does not matched, '
+            raise DeSerializationError('object length does not matched, '
                                      'Serialize({}), Object({})'
                                      .format(len(self), len(obj)))
 
