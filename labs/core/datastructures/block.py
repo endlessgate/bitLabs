@@ -25,4 +25,3 @@ class BaseBlock(DerivedBase):
     def __repr__(self):
         return 'Block(#{}, {})'.format(self.number, self.hash[2:10])
 
-print("Block(#1, 0xabedafe)")
