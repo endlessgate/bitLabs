@@ -33,8 +33,8 @@ class SerialPort(list):
     def deserialize(self, obj):
         if len(self) != len(obj):
             raise DeSerializationError('object length does not matched, '
-                                     'Serialize({}), Object({})'
-                                     .format(len(self), len(obj)))
+                                       'DeSerialize({}), Object({})'
+                                       .format(len(self), len(obj)))
 
         for props, value in zip(self, obj):
             yield props.deserialize(value)
