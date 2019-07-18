@@ -5,6 +5,7 @@ from labs.exceptions import (
     DeSerializationError
 )
 
+
 def has_serialize(obj):
     return hasattr(obj, 'serialize') and hasattr(obj, 'deserialize')
 
