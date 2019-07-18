@@ -22,19 +22,6 @@ def generate_random() -> ec.EllipticCurvePrivateKey:
     return
 
 
-for i in range(100000):
-    a = generate_random()
-
-    v = a.private_numbers().private_value
-
-    ib = int_to_big(v)
-    t = v.to_bytes(32, byteorder='big')
-    s = int_from_big(ib)
-    print(v)
-    print(ib)
-    print(s)
-    if v != s:
-        raise ValueError
 
 
 
