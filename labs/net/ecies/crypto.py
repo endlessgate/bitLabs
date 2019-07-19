@@ -1,12 +1,22 @@
 
+import math
+import struct
+
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, hmac
-from cryptography.hazmat.primitives.ciphers import algorithms, modes
 from cryptography.hazmat.primitives.asymmetric import ec
-from labs.utils import pad32, int_to_big, int_from_big
+from cryptography.hazmat.primitives.serialization import PublicFormat, Encoding
+from labs.exceptions import InvalidKeys
 
-AES = algorithms.AES
-COUNTER = modes.CTR
+from labs.utils import (
+    pad32,
+    int_to_big,
+    int_from_big,
+    is_bytes
+)
+
+from hashlib import sha3_256
+
 CURVE = ec.SECP256K1()
 
 
@@ -16,12 +26,55 @@ def sha3_256_mac(key: bytes, data: bytes) -> bytes:
     return mac.finalize()
 
 
-def generate_random() -> ec.EllipticCurvePrivateKey:
+def generate_random():
     r = ec.generate_private_key(CURVE, default_backend())
+    privkey_nums = r.private_numbers().private_value
+    pubkey = r.public_key().public_bytes(Encoding.X962, PublicFormat.UncompressedPoint)
+    return pad32(int_to_big(privkey_nums)), pubkey
 
-    return
+
+def make_shared_secret(privkey, pubkey) -> bytes:
+    # priv_numbers = privkey.private_numbers().private_value
+    priv_numbers = int_from_big(privkey)    # Todo: keys management class
+    ec_privkey = ec.derive_private_key(priv_numbers, CURVE, default_backend())
+    try:
+        exchange_nums = ec.EllipticCurvePublicKey.from_encoded_point(CURVE, pubkey)
+        exchange_pubkey = exchange_nums.public_numbers().public_key(default_backend())
+    except ValueError as err:
+        raise InvalidKeys(name='ExchangePubKeys', errors=err)
+
+    return ec_privkey.exchange(ec.ECDH(), exchange_pubkey)
 
 
+def kdf(material: bytes) -> bytes:
+    # NIST.SP.800-56A
+    # key derivation function
+    if not is_bytes(material):
+        raise InvalidKeys(name="KDF",
+                          errors="key expected bytes, got {}".format(type(material).__name__))
 
+    hash_length = 32 * 8
+    material_length = int_from_big(material).bit_length()
+    if material_length > hash_length * (2 ** 32 - 1):
+        raise InvalidKeys(name="KDF",
+                          errors="secret material-key error, length={}".format(material_length))
+
+    reps = math.ceil(material_length / hash_length)
+    counter = []
+    for i in range(reps):
+        counter.append(
+            struct.pack(">I", i + 1)
+        )  # 32bit
+
+    ctx = sha3_256()
+    for salt in counter:
+        ctx.update(salt)
+
+    ctx.update(material)
+    key = ctx.digest()
+    if len(key) != 32:
+        raise InvalidKeys(name="KDF",
+                          errors="derived key error, length={} ".format(len(key)))
+    return key
 
 
