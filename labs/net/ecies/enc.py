@@ -9,6 +9,11 @@ from labs.utils import (
     pad4
 )
 
+from labs.exceptions import (
+    InvalidKeys,
+    PayloadError
+)
+
 from cryptography.hazmat.primitives.ciphers import (
     Cipher,
     algorithms,
@@ -31,13 +36,16 @@ def make_specific_keys(key):
     return key[:piece], key[piece:]
 
 
-def encrypt(pubkey: bytes, data: bytes, shared=b''):
+def encrypt(pubkey: bytes, data: bytes, shared=b'') -> bytes:
 
     # generate random number
     r, p = generate_random()    # random r, public p
 
     # shared secret s
-    shared_secret = make_shared_secret(r, pubkey)
+    try:
+        shared_secret = make_shared_secret(r, pubkey)
+    except InvalidKeys as err:
+        raise PayloadError(str(err))
 
     # key derive
     key = kdf(shared_secret)
