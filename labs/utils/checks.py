@@ -3,6 +3,7 @@ types_bytes = (bytes, bytearray)
 types_int = int
 types_str = str
 types_strings = (str, bytes, bytearray)
+types_bool = bool
 
 
 def is_bytes(value) -> bool:
@@ -21,8 +22,6 @@ def is_strings(value) -> bool:
     return isinstance(value, types_strings)
 
 
-def bit_length(x: int):
-    return x.bit_length()
-
-
+def is_bool(value) -> bool:
+    return isinstance(value, types_bool)
 

@@ -11,7 +11,7 @@ from .checks import (
     is_integer,
     is_str,
     is_strings,
-    bit_length,
+    is_bool,
 )
 
 from .pad import (
@@ -22,6 +22,7 @@ from .pad import (
 from .converters import (
     int_to_big,
     int_from_big,
+    bit_length,
 )
 
 

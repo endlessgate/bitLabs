@@ -1,6 +1,10 @@
 
 import binascii
-from labs.utils import is_bytes, bit_length
+from labs.utils import is_bytes
+
+
+def bit_length(x: int):
+    return x.bit_length()
 
 
 def int_to_big(value: int):
