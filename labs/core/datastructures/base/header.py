@@ -8,6 +8,9 @@ from labs.utils.serialize import Serializer
 
 
 class BaseHeader(Serializer, ABC):
+    entries = [
+        ()
+    ]
 
     # __slots__ = ('previous_hash',
     #              'base',

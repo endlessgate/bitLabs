@@ -8,6 +8,9 @@ from labs.utils.serialize import Serializer
 
 
 class BaseTransaction(Serializer, ABC):
+    entries = [
+        ()
+    ]
 
     # __slots__ = ('nonce',
     #              'to',
