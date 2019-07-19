@@ -21,6 +21,7 @@ from cryptography.hazmat.primitives.ciphers import (
 )
 
 from labs.net.ecies.crypto import (
+    make_specific_keys,
     generate_random,
     make_shared_secret,
     sha3_256_mac,
@@ -31,9 +32,11 @@ AES = algorithms.AES    # aes
 MODE = modes.CTR    # counter
 
 
-def make_specific_keys(key):
-    piece = len(key) // 2
-    return key[:piece], key[piece:]
+def encode_payload(body, mackey, shared, p):
+    body_size = pad4(int_to_big(len(body)))
+    checksum = sha3_256_mac(mackey, body + body_size + shared)
+    payload = [p, checksum, body, body_size]
+    return b''.join(payload)
 
 
 def encrypt(pubkey: bytes, data: bytes, shared=b'') -> bytes:
@@ -54,14 +57,11 @@ def encrypt(pubkey: bytes, data: bytes, shared=b'') -> bytes:
 
     # encryption
     aes = AES(enckey)
-    iv = os.urandom(len(r) // 2)    # 16bytes
+    iv = os.urandom(len(mackey) // 2)    # 16bytes
     cipher = Cipher(aes, MODE(iv), default_backend()).encryptor()
     ctext = cipher.update(data) + cipher.finalize()
 
     # outputs
     body = iv + ctext
-    body_length = pad4(int_to_big(len(body)))
-    checksum = sha3_256_mac(mackey, body_length + body + shared)
-    payload = [p, checksum, body_length, body]
-    return b''.join(payload)
+    return encode_payload(body, mackey, shared, p)
 

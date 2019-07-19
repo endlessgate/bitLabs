@@ -20,6 +20,11 @@ from hashlib import sha3_256
 CURVE = ec.SECP256K1()
 
 
+def make_specific_keys(key):
+    piece = len(key) // 2
+    return key[:piece], key[piece:]
+
+
 def sha3_256_mac(key: bytes, data: bytes) -> bytes:
     mac = hmac.HMAC(key, hashes.SHA3_256(), default_backend())
     mac.update(data)
