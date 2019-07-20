@@ -6,19 +6,24 @@ from abc import (
 
 from labs.utils.serialize import Serializer
 
+from labs.core.datastructures.datatypes import (
+    integer,
+    bytes_string,
+    address,
+    signature
+)
+
 
 class BaseTransaction(Serializer, ABC):
     entries = [
-        ()
+        ('nonce', integer),
+        ('value', integer),
+        ('cost', integer),
+        ('to', address),
+        ('target', address),
+        ('data', bytes_string),
+        ('signature', signature)
     ]
-
-    # __slots__ = ('nonce',
-    #              'to',
-    #              'value',
-    #              'cost',
-    #              'target',
-    #              'data',
-    #              'signature')
 
     @property
     @abstractmethod
@@ -28,6 +33,19 @@ class BaseTransaction(Serializer, ABC):
     @property
     @abstractmethod
     def sender(self):
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def create(cls, nonce, cost, to, value, data=b''):
+        raise NotImplementedError
+
+    @abstractmethod
+    def sign(self, privkey):
+        raise NotImplementedError
+
+    @abstractmethod
+    def validate(self):
         raise NotImplementedError
 
     def __repr__(self):

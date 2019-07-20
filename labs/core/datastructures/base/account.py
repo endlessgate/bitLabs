@@ -2,14 +2,12 @@
 from abc import ABC
 
 from labs.utils.serialize import Serializer
-from labs.utils.serialize.datatypes import (
-    integer,
-    List
-)
 
-from .datatypes import (
+from labs.core.datastructures.datatypes import (
+    integer,
     bytes32,
-    root32
+    hash32,
+    active32
 )
 
 
@@ -17,11 +15,15 @@ class BaseAccount(Serializer, ABC):
     entries = [
         ('nonce', integer),
         ('balance', integer),
-        ('storage_root', root32),
+        ('access', bytes32),
+        ('storage_root', hash32),
         ('path', bytes32),
-        ('active', List(bytes32))
+        ('active', active32)
     ]
 
     def __repr__(self):
-        return 'Account(balance={}, nonce={})'.format(self.balance, self.nonce)
+        return 'Account(balance={}, nonce={}, storage=0x{}, path=0x{})'.format(self.balance,
+                                                                               self.nonce,
+                                                                               self.storage_root.hex(),
+                                                                               self.path.hex())
 

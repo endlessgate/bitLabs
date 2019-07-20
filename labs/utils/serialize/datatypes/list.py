@@ -26,7 +26,7 @@ class List:
     def serialize(self, obj):
         is_valid = any((
             self.size and len(obj) == 0,
-            len(obj) <= self.size
+            len(obj) == self.size
         ))
         if not is_valid:
             raise SerializationError('invalid elements, expected size {}, got {}, {}'
