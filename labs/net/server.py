@@ -1,7 +1,7 @@
 
 import asyncio
 from abc import ABC
-from .peers import Tunnel
+from labs.net.peers import Tunnel
 
 expected_errors = (
     TimeoutError,

@@ -1,7 +1,7 @@
 
 import asyncio
 
-from .handshake import (
+from labs.net.peers.handshake import (
     handshake,
     accept
 )
