@@ -37,7 +37,7 @@ class BaseTransaction(Serializer, ABC):
 
     @classmethod
     @abstractmethod
-    def create(cls, nonce, cost, to, value, data=b''):
+    def make(cls, nonce, cost, to, value, data=b''):
         raise NotImplementedError
 
     @abstractmethod

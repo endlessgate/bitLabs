@@ -13,7 +13,7 @@ class Transaction(BaseTransaction):
         pass
 
     @classmethod
-    def create(cls, nonce, cost, to, value, data=b''):
+    def make(cls, nonce, cost, to, value, data=b''):
         pass
 
     def sign(self, privkey):
