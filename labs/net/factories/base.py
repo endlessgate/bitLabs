@@ -7,7 +7,7 @@ class BaseFactory(ABC):
 
     @property
     @abstractmethod
-    def node_class(self):
+    def peer_class(self):
         raise NotImplementedError
 
     @property
@@ -16,11 +16,11 @@ class BaseFactory(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def build_node(self, **kwargs):
+    def make_peer(self, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
-    def build_tunnel(self, **kwargs):
+    def make_tunnel(self, **kwargs):
         raise NotImplementedError
 
     def __init__(self, secretkey, token: CancelToken):
