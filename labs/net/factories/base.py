@@ -4,16 +4,8 @@ from cancel_token import CancelToken
 
 
 class BaseFactory(ABC):
-
-    @property
-    @abstractmethod
-    def peer_class(self):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def tunnel_class(self):
-        raise NotImplementedError
+    peer_class = None
+    tunnel_class = None
 
     @abstractmethod
     def make_peer(self, **kwargs):

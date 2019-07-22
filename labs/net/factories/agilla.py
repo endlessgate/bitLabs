@@ -1,16 +1,15 @@
 
 from labs.net.factories import BaseFactory
+from labs.net.peers.tunnel import Tunnel
+
+
+class AgillaTunnel(Tunnel):
+    pass
 
 
 class AgillaFactory(BaseFactory):
-
-    @property
-    def peer_class(self):
-        pass
-
-    @property
-    def tunnel_class(self):
-        pass
+    peer_class = None
+    tunnel_class = AgillaTunnel
 
     def make_peer(self, **kwargs):
         pass

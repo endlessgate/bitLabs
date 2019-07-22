@@ -13,8 +13,10 @@ class BaseListener(ABC):
 
     def __init__(self,
                  port: int,
+                 privkey: bytes,
                  ):
         self.port = port
+        self._privkey = privkey
         self._listener = None
 
     async def start_listener(self):
