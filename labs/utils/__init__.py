@@ -21,6 +21,7 @@ from .pad import (
 
 from .converters import (
     int_to_big,
+    int_to_big16,
     int_from_big,
     bit_length,
 )
