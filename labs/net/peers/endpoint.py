@@ -1,6 +1,7 @@
 
 import ipaddress
 from labs.utils import (
+    read_only,
     int_to_big16,
     int_from_big
 )
@@ -12,9 +13,7 @@ class IPAddress:
         self._stream_port = stream_port
         self._datagram_port = datagram_port
 
-    @property
-    def ip_address(self):
-        return str(self._ip_address)
+    ip_address = read_only('_ip_address')
 
     @property
     def stream_port(self):
@@ -55,3 +54,4 @@ class EndPoint:
         return 'EndPoint({}:{})'.format(str(self), self.address.stream_port)
 
     # todo: kd
+
