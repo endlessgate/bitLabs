@@ -2,6 +2,7 @@
 import math
 import struct
 
+from labs.utils.keys import PrivateKey
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, hmac
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -15,7 +16,6 @@ from labs.utils import (
     is_bytes
 )
 
-from hashlib import sha3_256
 
 CURVE = ec.SECP256K1()
 
@@ -31,11 +31,8 @@ def sha3_256_mac(key: bytes, data: bytes) -> bytes:
     return mac.finalize()
 
 
-def generate_random():
-    r = ec.generate_private_key(CURVE, default_backend())
-    privkey_nums = r.private_numbers().private_value
-    pubkey = r.public_key().public_bytes(Encoding.X962, PublicFormat.UncompressedPoint)
-    return pad32(int_to_big(privkey_nums)), pubkey
+def generate_random() -> PrivateKey:
+    return PrivateKey.make()
 
 
 def make_shared_secret(privkey, pubkey) -> bytes:
@@ -71,12 +68,12 @@ def kdf(material: bytes) -> bytes:
             struct.pack(">I", i + 1)
         )  # 32bit
 
-    ctx = sha3_256()
+    ctx = hashes.SHA3_256()
     for salt in counter:
         ctx.update(salt)
 
     ctx.update(material)
-    key = ctx.digest()
+    key = ctx.finalize()
     if len(key) != 32:
         raise InvalidKeys(name="KDF",
                           errors="derived key error, length={} ".format(len(key)))

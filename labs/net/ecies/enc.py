@@ -42,11 +42,11 @@ def encode_payload(body, mackey, shared, p):
 def encrypt(pubkey: bytes, data: bytes, shared=b'') -> bytes:
 
     # generate random number
-    r, p = generate_random()    # random r, public p
+    keys = generate_random()    # random r, public p
 
     # shared secret s
     try:
-        shared_secret = make_shared_secret(r, pubkey)
+        shared_secret = make_shared_secret(keys.private_bytes, pubkey)
     except InvalidKeys as err:
         raise PayloadError(str(err))
 
@@ -63,5 +63,5 @@ def encrypt(pubkey: bytes, data: bytes, shared=b'') -> bytes:
 
     # outputs
     body = iv + ctext
-    return encode_payload(body, mackey, shared, p)
+    return encode_payload(body, mackey, shared, keys.public_bytes)
 
