@@ -94,6 +94,7 @@ def mul(p, q):
 
 def generate_k(hashes, privkey, hash_func=hashlib.sha3_256):
     # RFC 6979: https://tools.ietf.org/html/rfc6979
+
     v = b'\x01' * 32
     k = b'\x00' * 32
 
