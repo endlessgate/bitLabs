@@ -6,12 +6,9 @@ from labs.utils.keys import PrivateKey
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, hmac
 from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.serialization import PublicFormat, Encoding
 from labs.exceptions import InvalidKeys
 
 from labs.utils import (
-    pad32,
-    int_to_big,
     int_from_big,
     is_bytes
 )
