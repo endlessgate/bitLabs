@@ -27,4 +27,7 @@ from .converters import (
 )
 
 
+def read_only(name):
+    return property(lambda self: getattr(self, name))
+
 
