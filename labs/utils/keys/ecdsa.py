@@ -93,7 +93,7 @@ def mul(p, q):
 
 
 def generate_k(hashes, privkey, hash_func=hashlib.sha3_256):
-    # RFC 6979: https://tools.ietf.org/html/rfc6979
+    # RFC6979::section#3.2: https://tools.ietf.org/html/rfc6979
 
     v = b'\x01' * 32
     k = b'\x00' * 32
@@ -109,6 +109,7 @@ def generate_k(hashes, privkey, hash_func=hashlib.sha3_256):
 
 
 def sign(hashes, privkey):
+    # X9.62
     hashes_numbers = int_from_big(hashes)
     privkey_numbers = int_to_big(privkey)
 
