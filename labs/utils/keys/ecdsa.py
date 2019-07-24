@@ -5,7 +5,8 @@ import hmac
 from labs.utils.keys.const import SECP256K1
 from labs.utils import (
     int_to_big,
-    int_from_big
+    int_from_big,
+    pad32
 )
 
 
@@ -104,20 +105,58 @@ def generate_k(hashes, privkey, hash_func=hashlib.sha3_256):
     v = hmac.new(k, v, hash_func).digest()
 
     v = hmac.new(k, v, hash_func).digest()
-    k = int_to_big(v)
+    k = int_from_big(v)
     return k
 
 
-def sign(hashes, privkey):
+def sign(hashes: bytes, privkey: bytes):
     # X9.62
     hashes_numbers = int_from_big(hashes)
-    privkey_numbers = int_to_big(privkey)
+    privkey_numbers = int_from_big(privkey)
 
     k = generate_k(hashes, privkey)
     r, y = mul(CURVE.G, k)
     s = ec_inv(k, CURVE.N) * (hashes_numbers + r * privkey_numbers) % CURVE.N
 
-    v = 27 + ((y % 2) ^ (0 if s * 2 < CURVE.N else 1))
+    v = 33 + ((y % 2) ^ (0 if s * 2 < CURVE.N else 1))
     s = s if s * 2 < CURVE.N else CURVE.N - s
-    return [r, s, v - 27]
+    return [r, s, v - 33]
 
+
+def recover(hashes: bytes, sig_vrs):
+    r, s, v = sig_vrs
+    v = v + 33
+    # todo range exception
+    x = r
+    a = ((x * x * x) + (CURVE.A * x) + CURVE.B) % CURVE.P
+    b = pow(a, (CURVE.P + 1) // 4, CURVE.P)
+
+    y = b if (b - (v % 2)) % 2 == 0 else CURVE.P - b
+    e = int_from_big(hashes)
+
+    mg = ec_mul((CURVE.Gx, CURVE.Gy, 1), (CURVE.N - e) % CURVE.N)
+    xy = ec_mul((x, y, 1), s)
+    _xy = ec_add(mg, xy)
+    Q = ec_mul(_xy, ec_inv(r, CURVE.N))
+    p, q = from_jacob(Q)
+    return pad32(int_to_big(p)), pad32(int_to_big(q))
+
+
+def verifies(hashes: bytes, sig_rs, pubkey):
+    r, s = sig_rs
+    public_p = tuple(int_from_big(p) for p in pubkey)
+
+    w = ec_inv(s, CURVE.N)
+    e = int_from_big(hashes)
+
+    p, q = e * w % CURVE.N, r * w % CURVE.N
+    a = mul(CURVE.G, p)
+    b = mul(public_p, q)
+    v = ec_add(to_jacob(a), to_jacob(b))
+    x, _ = from_jacob(v)
+    is_verified_r = r == x == r % CURVE.N
+    is_verified_s = s == s % CURVE.N
+    if is_verified_r and is_verified_s:
+        return True
+    else:
+        return False
