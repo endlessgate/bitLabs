@@ -12,7 +12,7 @@ from labs.utils import (
 CURVE = SECP256K1()
 
 
-def inv(p: int, q: int):
+def ec_inv(p: int, q: int):
     if p == 0:
         return 0
 
@@ -26,7 +26,7 @@ def inv(p: int, q: int):
 
 
 def from_jacob(p):
-    k = inv(p[2], CURVE.P)
+    k = ec_inv(p[2], CURVE.P)
     return (p[0] * k**2) % CURVE.P, (p[1] * k**3) % CURVE.P
 
 
@@ -34,7 +34,7 @@ def to_jacob(p):
     return p[0], p[1], 1
 
 
-def jacob_double(p):
+def ec_double(p):
     if not p[1]:
         return 0, 0, 0
 
@@ -48,7 +48,7 @@ def jacob_double(p):
     return x, y, z
 
 
-def jacob_add(p, q):
+def ec_add(p, q):
     if not p[1]:
         return q
     if not q[1]:
@@ -61,7 +61,7 @@ def jacob_add(p, q):
     if x1 == x2:
         if y1 != y2:
             return 0, 0, 1
-        return jacob_double(p)
+        return ec_double(p)
 
     _x = x2 - x1
     _y = y2 - y1
@@ -75,21 +75,21 @@ def jacob_add(p, q):
     return x, y, z
 
 
-def jacob_mul(p, q):
+def ec_mul(p, q):
     if p[1] == 0 or q == 0:
         return 0, 0, 1
     if q == 1:
         return p
     if q < 0 or q >= CURVE.N:
-        return jacob_mul(p, q // 2)
+        return ec_mul(p, q // 2)
     if (q % 2) == 0:
-        return jacob_double(jacob_mul(p, q // 2))
+        return ec_double(ec_mul(p, q // 2))
     if (q % 2) == 1:
-        return jacob_add(jacob_double(jacob_mul(p, q // 2)), p)
+        return ec_add(ec_double(ec_mul(p, q // 2)), p)
 
 
 def mul(p, q):
-    return from_jacob(jacob_mul(to_jacob(p), q))
+    return from_jacob(ec_mul(to_jacob(p), q))
 
 
 def generate_k(hashes, privkey, hash_func=hashlib.sha3_256):
@@ -114,7 +114,7 @@ def sign(hashes, privkey):
 
     k = generate_k(hashes, privkey)
     r, y = mul(CURVE.G, k)
-    s = inv(k, CURVE.N) * (hashes_numbers + r * privkey_numbers) % CURVE.N
+    s = ec_inv(k, CURVE.N) * (hashes_numbers + r * privkey_numbers) % CURVE.N
 
     v = 27 + ((y % 2) ^ (0 if s * 2 < CURVE.N else 1))
     s = s if s * 2 < CURVE.N else CURVE.N - s
