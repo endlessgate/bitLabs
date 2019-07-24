@@ -1,5 +1,4 @@
 
-
 class SECP256K1:
     A = 0
     B = 7
