@@ -32,10 +32,10 @@ AES = algorithms.AES    # aes
 MODE = modes.CTR    # counter
 
 
-def encode_payload(body, mackey, shared, p):
+def encode_payload(body, mackey, shared, pubkey):
     body_size = pad4(int_to_big(len(body)))
     checksum = sha3_256_mac(mackey, body + body_size + shared)
-    payload = [p, checksum, body, body_size]
+    payload = [b'\x04' + pubkey, checksum, body, body_size]
     return b''.join(payload)
 
 

@@ -22,18 +22,3 @@ async def accept(reader: asyncio.StreamReader,
                  privkey: bytes):
     pass
 
-
-if __name__ == '__main__':
-    # peer private, public
-    priv, pub = ecies.generate_random()
-
-    # ephemeral private, public
-    r, p = ecies.generate_random()
-
-    peer_key_shared_secret = ecies.make_shared_secret(priv, pub)
-
-    random = os.urandom(16)
-    nonce = sha3_256(random).digest()
-    # todo: ecdsa first
-    # create... pending
-

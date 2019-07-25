@@ -2,6 +2,7 @@
 import math
 import struct
 
+from hashlib import sha3_256
 from labs.utils.keys import PrivateKey
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, hmac
@@ -37,7 +38,7 @@ def make_shared_secret(privkey, pubkey) -> bytes:
     priv_numbers = int_from_big(privkey)    # Todo: keys management class
     ec_privkey = ec.derive_private_key(priv_numbers, CURVE, default_backend())
     try:
-        exchange_nums = ec.EllipticCurvePublicKey.from_encoded_point(CURVE, pubkey)
+        exchange_nums = ec.EllipticCurvePublicKey.from_encoded_point(CURVE, b'\x04' + pubkey)
         exchange_pubkey = exchange_nums.public_numbers().public_key(default_backend())
     except ValueError as err:
         raise InvalidKeys(name='ExchangePubKeys', errors=err)
@@ -65,12 +66,12 @@ def kdf(material: bytes) -> bytes:
             struct.pack(">I", i + 1)
         )  # 32bit
 
-    ctx = hashes.SHA3_256()
+    ctx = sha3_256()
     for salt in counter:
         ctx.update(salt)
 
     ctx.update(material)
-    key = ctx.finalize()
+    key = ctx.digest()
     if len(key) != 32:
         raise InvalidKeys(name="KDF",
                           errors="derived key error, length={} ".format(len(key)))

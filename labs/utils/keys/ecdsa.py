@@ -85,7 +85,7 @@ def ec_mul(p, q):
         return ec_mul(p, q // 2)
     if (q % 2) == 0:
         return ec_double(ec_mul(p, q // 2))
-    if (q % 2) == 1:
+    elif (q % 2) == 1:
         return ec_add(ec_double(ec_mul(p, q // 2)), p)
 
 
@@ -128,7 +128,7 @@ def recover(hashes: bytes, sig_vrs):
     v = v + 33
     # todo range exception
     x = r
-    a = ((x * x * x) + (CURVE.A * x) + CURVE.B) % CURVE.P
+    a = (x * x * x + CURVE.A * x + CURVE.B) % CURVE.P
     b = pow(a, (CURVE.P + 1) // 4, CURVE.P)
 
     y = b if (b - (v % 2)) % 2 == 0 else CURVE.P - b
@@ -138,8 +138,9 @@ def recover(hashes: bytes, sig_vrs):
     xy = ec_mul((x, y, 1), s)
     _xy = ec_add(mg, xy)
     Q = ec_mul(_xy, ec_inv(r, CURVE.N))
+
     p, q = from_jacob(Q)
-    return pad32(int_to_big(p)), pad32(int_to_big(q))
+    return b''.join((pad32(int_to_big(p)), pad32(int_to_big(q))))
 
 
 def verifies(hashes: bytes, sig_rs, pubkey):
@@ -160,3 +161,22 @@ def verifies(hashes: bytes, sig_rs, pubkey):
         return True
     else:
         return False
+
+
+def encode_signature(sig_vrs):
+    r, s, v = sig_vrs
+    r_bytes = pad32(int_to_big(r))
+    s_bytes = pad32(int_to_big(s))
+    v_bytes = int_to_big(v)
+    return b''.join((r_bytes, s_bytes, v_bytes))
+
+
+def decode_signature(sig_vrs):
+    sig = sig_vrs[:32], sig_vrs[32:64], sig_vrs[-1:]
+    decode_sig = [
+        int_from_big(point)
+        for point
+        in sig
+    ]
+    return decode_sig
+

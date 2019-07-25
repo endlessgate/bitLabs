@@ -48,7 +48,7 @@ def decrypt(privkey: bytes, data: bytes, shared=b'') -> bytes:
 
     enter_shared, checksum, body = decode_payload(data)
     try:
-        shared_secret = make_shared_secret(privkey, enter_shared)
+        shared_secret = make_shared_secret(privkey, enter_shared[1:])
     except InvalidKeys as err:
         raise PayloadError(str(err))
 
