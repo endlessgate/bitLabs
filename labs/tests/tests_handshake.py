@@ -88,5 +88,4 @@ def handshake_flows():
 
 if __name__ == '__main__':
     handshake_flows()
-    print(pad4(int_to_big(0)))
 
