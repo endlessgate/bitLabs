@@ -9,7 +9,11 @@ from labs.utils.keys import (
 )
 
 from labs.utils.keys.ecdsa import recover
-from labs.utils import int_from_big, int_to_big
+from labs.utils import (
+    pad4,
+    int_from_big,
+    int_to_big
+)
 
 
 def handshake_flows():
@@ -38,7 +42,7 @@ def handshake_flows():
 
     # 65, 65, 32, 4, 4
     # signature, public, nonce, version, suffix (170): handshake messages
-    encode_payload = b''.join((encode_sig, my_keys.public_bytes, nonce, b'\x00\x00\x00\x01', b'\x00\x00\x00\x00'))
+    encode_payload = b''.join((encode_sig, my_keys.public_bytes, nonce, pad4(int_to_big(1)), pad4(int_to_big(0))))
     cipher = ecies.encrypt(keys.public_bytes, encode_payload)
 
     # -------------------------------------------------------------------------------#
@@ -84,4 +88,5 @@ def handshake_flows():
 
 if __name__ == '__main__':
     handshake_flows()
+    print(pad4(int_to_big(0)))
 
