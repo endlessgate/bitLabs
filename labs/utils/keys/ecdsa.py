@@ -145,16 +145,17 @@ def recover(hashes: bytes, sig_vrs):
 
 def verifies(hashes: bytes, sig_rs, pubkey):
     r, s = sig_rs
-    public_p = tuple(int_from_big(p) for p in pubkey)
+    public_p = int_from_big(pubkey[:32]), int_from_big(pubkey[32:64])
 
     w = ec_inv(s, CURVE.N)
     e = int_from_big(hashes)
-
     p, q = e * w % CURVE.N, r * w % CURVE.N
+
     a = mul(CURVE.G, p)
     b = mul(public_p, q)
     v = ec_add(to_jacob(a), to_jacob(b))
     x, _ = from_jacob(v)
+
     is_verified_r = r == x == r % CURVE.N
     is_verified_s = s == s % CURVE.N
     if is_verified_r and is_verified_s:
