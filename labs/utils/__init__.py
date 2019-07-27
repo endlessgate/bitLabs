@@ -17,11 +17,13 @@ from .checks import (
 from .pad import (
     pad32,
     pad4,
+    pad2
 )
 
 from .converters import (
     int_to_big,
     int_to_big16,
+    int_to_big32,
     int_from_big,
     bit_length,
 )

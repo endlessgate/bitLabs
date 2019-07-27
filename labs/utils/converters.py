@@ -16,11 +16,27 @@ def int_to_big(value: int):
 
 
 def int_to_big16(value: int):
+    if value < 0:
+        raise ValueError("must be unsigned integer, got {}".format(value))
+
     if hasattr(value, 'to_bytes'):
         try:
             return value.to_bytes(2, byteorder='big')
         except OverflowError:
-            raise ValueError("int to big16, value must be smaller than 65535, got {}".format(value))
+            raise ValueError("int to big16, value must be smaller than uint16, got {}".format(value))
+    else:
+        raise ValueError("int to big16, value expected integer, got {}".format(type(value).__name__))
+
+
+def int_to_big32(value: int):
+    if value < 0:
+        raise ValueError("must be unsigned integer, got {}".format(value))
+
+    if hasattr(value, 'to_bytes'):
+        try:
+            return value.to_bytes(4, byteorder='big')
+        except OverflowError:
+            raise ValueError("int to big16, value must be smaller than uint32, got {}".format(value))
     else:
         raise ValueError("int to big16, value expected integer, got {}".format(type(value).__name__))
 

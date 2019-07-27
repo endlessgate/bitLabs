@@ -15,3 +15,8 @@ def pad32(value: bytes) -> bytes:
 def pad4(value: bytes) -> bytes:
     has_padding(value)
     return value.rjust(4, b'\x00')
+
+
+def pad2(value: bytes) -> bytes:
+    has_padding(value)
+    return value.rjust(2, b'\x00')
