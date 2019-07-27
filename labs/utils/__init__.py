@@ -15,9 +15,9 @@ from .checks import (
 )
 
 from .pad import (
+    pad256,
     pad32,
-    pad4,
-    pad2
+    pad16
 )
 
 from .converters import (

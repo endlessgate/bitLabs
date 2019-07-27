@@ -6,7 +6,7 @@ from cryptography.hazmat.backends import default_backend
 
 from labs.utils import (
     int_to_big,
-    pad4
+    pad32
 )
 
 from labs.exceptions import (
@@ -33,7 +33,7 @@ MODE = modes.CTR    # counter
 
 
 def encode_payload(body, mackey, shared, pubkey):
-    body_size = pad4(int_to_big(len(body)))
+    body_size = pad32(int_to_big(len(body)))
     checksum = sha3_256_mac(mackey, body + body_size + shared)
     payload = [b'\x04' + pubkey, checksum, body, body_size]
     return b''.join(payload)
