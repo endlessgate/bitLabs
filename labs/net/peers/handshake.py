@@ -99,19 +99,21 @@ async def _make_shared_secret(reader: asyncio.StreamReader,
 
 def _accept_decode_secret(keys, cipher):
     payload = ecies.decrypt(keys.private_bytes, cipher)
-    sequence = payload[:4]
+    raw_seq = payload[:4]
     raw_ver, raw_suf = payload[-4:-2], payload[-2:]
 
     # expected exception: not bytes, decode
     version = int_from_big(raw_ver)
     suffix = int_from_big(raw_suf)
-    has_accept = all((version == 1, suffix == 0, int_from_big(sequence) == 0))
+    sequence = int_from_big(raw_seq)
+    has_accept = all((version == 1, suffix == 0, sequence == 0))
 
     if not has_accept:
         raise ValueError('during accept handling, unexpected payload')
 
     random, pubkey, sig = decode_payload(payload[4:])
     shared_secret = ecies.make_shared_secret(keys.private_bytes, pubkey)
+
     exchange_secret = sha3_256(
         shared_secret + random + sequence
     ).digest()
