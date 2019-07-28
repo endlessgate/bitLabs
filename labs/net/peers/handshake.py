@@ -25,6 +25,7 @@ def encode_payload(*args):
     payload = b''.join(args)
     if len(payload) != 169:
         raise ValueError('handshake payload size error, got {}'.format(len(payload)))
+    return payload
 
 
 def decode_payload(payload):
