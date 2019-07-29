@@ -1,6 +1,8 @@
 
 import sys
 
+# -l --localize
+
 
 def main():
     if sys.version[:3] < '3.6':
