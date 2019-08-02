@@ -8,9 +8,11 @@ from labs.utils.keys import (
     decode_signature
 )
 
-from labs.utils.keys.ecdsa import recover
+from labs.utils.keys import recover
+from labs.utils.keys.ecdsa import verifies
 from labs.utils import (
-    pad4,
+    pad32,
+    pad16,
     int_from_big,
     int_to_big
 )
@@ -35,14 +37,20 @@ def handshake_flows():
 
     random = os.urandom(16)
     nonce = sha3_256(random).digest()
-    secret = sha3_256(shared_secret + nonce).digest()
+    seq = pad32(int_to_big(0))
+    secret = sha3_256(shared_secret + nonce + seq).digest()
 
     s = my_ephem_keys.sign(secret)
     encode_sig = encode_signature(s)
 
     # 65, 65, 32, 4, 4
     # signature, public, nonce, version, suffix (170): handshake messages
-    encode_payload = b''.join((encode_sig, my_keys.public_bytes, nonce, pad4(int_to_big(1)), pad4(int_to_big(0))))
+
+    encode_payload = b''.join((seq,
+                               encode_sig,
+                               my_keys.public_bytes,
+                               nonce, pad16(int_to_big(1)),
+                               pad16(int_to_big(0))))
     cipher = ecies.encrypt(keys.public_bytes, encode_payload)
 
     # -------------------------------------------------------------------------------#
@@ -52,23 +60,26 @@ def handshake_flows():
     if plain != encode_payload:
         raise ValueError('plain != payload')
     if len(plain) != 169:
-        raise ValueError('payload size error')
+        raise ValueError('payload size error', len(plain))
 
     # decode payload
+    seqe = plain[:4]
+    plain = plain[4:]
     accept_sig = plain[:65]
     accept_public = plain[65:129]
     accept_nonce = plain[129:161]
-    ve, suff = plain[-8:-4], plain[-4:]
+    ve, suff = plain[-4:-2], plain[-2:]
 
-    if ve != b'\x00\x00\x00\x01':
+    if ve != b'\x00\x01':
         raise ValueError
-    if suff != b'\x00\x00\x00\x00':
+    if suff != b'\x00\x00':
         raise ValueError
 
     # stranger private key, my public key = shared secret
     stranger_shared_secret = ecies.make_shared_secret(keys.private_bytes, accept_public)
 
-    accept_secret = sha3_256(stranger_shared_secret + accept_nonce).digest()
+    accept_secret = sha3_256(
+        stranger_shared_secret + accept_nonce + seqe).digest()
     if accept_secret != secret:
         raise ValueError
 
@@ -78,6 +89,10 @@ def handshake_flows():
 
     accept_ephem_key = recover(accept_secret, decode_sig)
     handshake_sset = (accept_ephem_key, accept_nonce, accept_public)
+
+    print('verifies:', verifies(
+        accept_secret, decode_sig[:2], accept_ephem_key
+    ))
 
     # $ exchange data, verify $ #
 

@@ -5,6 +5,7 @@ import os
 from hashlib import sha3_256
 from labs.net import ecies
 from labs.net.peers.endpoint import EndPoint
+from labs.net.peers.secret import Secret
 
 from labs.utils.keys import (
     encode_signature,
@@ -35,29 +36,52 @@ def decode_payload(payload):
     return accept_random, accept_public, accept_sig
 
 
-async def handshake(endpoint: EndPoint, keys, token):
+async def open_handshake(endpoint: EndPoint, keys, token):
     reader, writer = await token.cancellable_wait(
         asyncio.open_connection(host=endpoint.address.ip_address,
                                 port=endpoint.address.stream_port),
         timeout=3
     )
-    await _make_shared_secret(reader, writer, endpoint, keys, token)
+    await _handshake_shared_secret(reader,
+                                   writer,
+                                   endpoint,
+                                   keys,
+                                   token)
 
     return
 
 
-async def accept(reader: asyncio.StreamReader,
-                 writer: asyncio.StreamWriter,
-                 keys,
-                 cipher: bytes):
-    _accept_decode_secret(keys, cipher)
+async def accept_handshake(reader: asyncio.StreamReader,
+                           writer: asyncio.StreamWriter,
+                           keys,
+                           cipher: bytes):
+    exchange_random, ephem_pubkey, pubkey = _accept_decode_secret(keys, cipher)
+
+    address, port, *_ = writer.get_extra_info('peername')
+    endpoint = EndPoint.make(pubkey, address, port)
+
+    # responder [keys, endpoint, token, (bool) got eip8]
+
+    random = os.urandom(16)
+    random_secret = sha3_256(random).digest()
+    sequence = pad32(int_to_big32(1))
+
+    ephemeral_keys = ecies.generate_random()
+    payload = encode_payload(sequence,
+                             ephemeral_keys.public_bytes,
+                             random_secret)
+
+    cipher = ecies.encrypt(payload, pubkey)
 
 
-async def _make_shared_secret(reader: asyncio.StreamReader,
-                              writer: asyncio.StreamWriter,
-                              endpoint: EndPoint,
-                              keys,
-                              token):
+    return endpoint
+
+
+async def _handshake_shared_secret(reader: asyncio.StreamReader,
+                                   writer: asyncio.StreamWriter,
+                                   endpoint: EndPoint,
+                                   keys,
+                                   token):
     ephemeral_keys = ecies.generate_random()
 
     shared_secret = ecies.make_shared_secret(keys.private_bytes, endpoint.pubkey)
@@ -121,5 +145,11 @@ def _accept_decode_secret(keys, cipher):
 
     decode_sig = decode_signature(sig)
     accept_ephemeral_key = recover(exchange_secret, decode_sig)
+
+    # ---- #
+
+    return random, accept_ephemeral_key, pubkey
+
+
 
 

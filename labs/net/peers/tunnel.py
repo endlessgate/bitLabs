@@ -3,8 +3,8 @@ import asyncio
 
 from labs.net.peers.endpoint import EndPoint
 from labs.net.peers.handshake import (
-    handshake,
-    accept
+    open_handshake,
+    accept_handshake
 )
 
 
@@ -22,7 +22,7 @@ class Tunnel:
 
     @classmethod
     async def open_connect(cls, endpoint: EndPoint, privkey: bytes, token) -> 'Tunnel':
-        await handshake(endpoint, privkey, token)
+        reader, writer, secret = await open_handshake(endpoint, privkey, token)
         return cls('reader', 'writer', 'privkey', 'endpoint')
 
     @classmethod
@@ -30,6 +30,6 @@ class Tunnel:
                              reader: asyncio.StreamReader,
                              writer: asyncio.StreamWriter,
                              privkey) -> 'Tunnel':
-        await accept('reader', 'writer', 'privkey')
+        await accept_handshake('reader', 'writer', 'privkey')
         return cls('reader', 'writer', 'privkey', 'endpoint')
 
