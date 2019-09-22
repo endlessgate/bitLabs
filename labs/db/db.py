@@ -17,7 +17,7 @@ class DB(BaseDB):
         return self._db.write_batch(transaction=t)
 
     def __setitem__(self, key: bytes, value: bytes):
-        raise_diff_with_bytes(key)
+        raise_diff_with_bytes(key, value)
         self._db.put(key, value)
 
     def __getitem__(self, key: bytes):
