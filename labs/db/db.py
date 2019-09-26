@@ -1,6 +1,7 @@
 
 import plyvel
 
+from contextlib import contextmanager
 from labs.abstract.db import BaseDB
 from labs.utils.checks import raise_diff_with_bytes
 
@@ -13,6 +14,7 @@ class DB(BaseDB):
             create_if_missing=True
         )
 
+    @contextmanager
     def write_batch(self, t=False):
         return self._db.write_batch(transaction=t)
 
@@ -30,3 +32,19 @@ class DB(BaseDB):
     def __contains__(self, key: bytes):
         raise_diff_with_bytes(key)
         return self._db.get(key) is not None
+
+
+class WriteBatch:
+    def __init__(self, db, batch):
+        self._base_db = db
+        self._batch = batch
+
+    def __setitem__(self, key, value):
+        self._batch.put(key, value)
+
+    def __getitem__(self, key):
+        return self._base_db[key]
+
+    def __delitem__(self, key):
+        self._batch.delete(key)
+
