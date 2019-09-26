@@ -4,4 +4,8 @@ from .bytes_string import bytes_string
 from .string import string
 from .boolean import boolean
 from .list import List
-from .serialize import Serialize, MetaSerialize
+from .serialport import SerialPort
+from .serialize import (
+    Serialize,
+    MetaSerialize
+)
