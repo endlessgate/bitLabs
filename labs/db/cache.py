@@ -3,14 +3,14 @@ from lru import LRU
 from labs.abstract.db import BaseDB
 
 
-class CacheRecord(BaseDB):
+class RecordDB(BaseDB):
 
     def __init__(self, db: BaseDB, size=1024):
         self._db = db
         self._size = size
         self._cached = LRU(self._size)
 
-    def cache_clear(self):
+    def reset(self):
         self._cached.clear()
 
     def __setitem__(self, key, value):
@@ -23,5 +23,5 @@ class CacheRecord(BaseDB):
         return self._cached[key]
 
     def __contains__(self, key):
-        return key in self._db
+        return key in self._cached
 

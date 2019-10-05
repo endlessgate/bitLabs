@@ -1,5 +1,4 @@
 
-from collections import OrderedDict
 from itertools import count
 from labs.exceptions import TraceError
 
@@ -14,121 +13,21 @@ class EventTrace(str):
 
 
 INSERTED_KEY = EventTrace("key was inserted")
+CHANGED_KEY = EventTrace("key was changed")
 DELETED_KEY = EventTrace("key was deleted")
 MISSING_KEY = EventTrace("key was missing")
 
 
-class TraceTables:
-
-    def __init__(self):
-        self._tables = OrderedDict()
-        self._sequence = count().__next__
-
-    def trace(self) -> 'TraceDB':
-        return TraceDB(self._tables.copy())
-
-    def __setitem__(self, key, value):
-        self._tables[key] = (value, self._sequence(), INSERTED_KEY)
-
-    def __getitem__(self, key):
-        value, seq, trace = self._tables.get(key, (-1, -1, MISSING_KEY))
-        if trace in (DELETED_KEY, MISSING_KEY):
-            raise TraceError(key, trace)
-        return value
-
-    def __delitem__(self, key):
-        value, seq, trace = self._tables.get(key, (-1, -1, MISSING_KEY))
-        if trace is not MISSING_KEY:
-            self._tables[key] = (value, seq, DELETED_KEY)
-
-
 class TraceDB:
-
-    def __init__(self, tables=None):
-        if not tables:
-            tables = {}
-        self._traceable = self._as_dict(tables, traceable=True)
-
-    @to_tuple
-    def apply(self, db, traceable=False):
-        for key, values in self._traceable.items():
-            value, trace = values
-
-            if not trace and traceable:
-                yield key, value, trace
-            elif trace:
-                db[key] = value
-
-    @to_dict
-    def _as_dict(self, tables, traceable):
-        for idx, items in enumerate(tables.items()):
-            key, (value, seq, trace) = items
-
-            if idx != seq:
-                reason = "index={}, sequence={}, trace={}, does not matched".format(idx, seq, trace)
-                raise TraceError(key, reason)
-
-            if trace is DELETED_KEY:
-                if traceable:
-                    yield key, (value, 0)
-            elif trace is INSERTED_KEY:
-                yield key, (value, 1)
-            else:
-                yield key, (value, -1)
-
-    def error_keys(self):
-        for key, values in self._traceable.items():
-            value, trace = values
-            if trace == -1:
-                yield key
-
-    def error_items(self):
-        for key, values in self._traceable.items():
-            value, trace = values
-            if trace == -1:
-                yield key, value
-
-    def deleted_keys(self):
-        for key, values in self._traceable.items():
-            value, trace = values
-            if not trace:
-                yield key
-
-    def deleted_items(self):
-        for key, values in self._traceable.items():
-            value, trace = values
-            if not trace:
-                yield key, value
-
-    def pending_keys(self):
-        for key, values in self._traceable.items():
-            value, trace = values
-            if trace == 1:
-                yield key
-
-    def pending_items(self):
-        for key, values in self._traceable.items():
-            value, trace = values
-            if trace == 1:
-                yield key, value
-
-    def __getitem__(self, key):
-        value, trace = self._traceable.get(key, (-1, MISSING_KEY))
-        if trace in (DELETED_KEY, MISSING_KEY):
-            raise TraceError(key, trace)
-        return value
-
-
-class Trace:
 
     def __init__(self, raw_db):
         self._raw_db = raw_db
-        self._traceable = TraceTables()
+        self._traceable = Trace()
 
     def reset(self):
-        self._traceable = TraceTables()
+        self._traceable = Trace()
 
-    def make_traceable(self) -> 'TraceDB':
+    def make_traceable(self) -> 'TraceBatch':
         return self._traceable.trace()
 
     def __setitem__(self, key: bytes, value: bytes):
@@ -139,7 +38,7 @@ class Trace:
             value = self._traceable[key]
         except TraceError as error:
             key, reason, *_ = error.args
-            if reason is DELETED_KEY:
+            if reason in (DELETED_KEY, CHANGED_KEY):
                 raise KeyError(key)
             value = self._raw_db[key]
 
@@ -148,4 +47,121 @@ class Trace:
     def __delitem__(self, key):
         del self._traceable[key]
 
+
+class IndexTable(dict):
+
+    def __setitem__(self, key, value):
+        if key not in self:
+            data = {key: (value, )}
+            self.update(data)
+        else:
+            values = self.get(key)
+            data = {key: values + (value, )}
+            self.update(data)
+
+
+class Trace:
+
+    def __init__(self):
+        self._index = IndexTable()
+        self._traceable = {}
+        self._sequence = count().__next__
+
+    def trace(self) -> 'TraceBatch':
+        return TraceBatch(self._as_dict())
+
+    @to_dict
+    def _as_dict(self):
+        for k, v in self._index.items():
+            values = []
+            for index in v:
+                values.append(self._traceable[index])
+            yield k, values
+
+    def _get_index(self, key):
+        index = self._index.get(key, MISSING_KEY)
+        if index is MISSING_KEY:
+            raise TraceError(key, index)
+        return index[-1]
+
+    def __setitem__(self, key, value):
+        index = self._sequence()
+        if key not in self._index:
+            self._traceable[index] = (value, INSERTED_KEY)
+        else:
+            change_index = self._get_index(key)
+            change_value, trace = self._traceable[change_index]
+            if trace is DELETED_KEY:
+                raise TraceError(key, trace)
+
+            self._traceable[change_index] = (change_value, CHANGED_KEY)
+            self._traceable[index] = (value, INSERTED_KEY)
+
+        self._index[key] = index
+
+    def __getitem__(self, key):
+        index = self._get_index(key)
+        value, trace = self._traceable.get(index, (-1, MISSING_KEY))
+        if trace in (DELETED_KEY, CHANGED_KEY, MISSING_KEY):
+            raise TraceError(key, trace)
+        return value
+
+    def __delitem__(self, key):
+        index = self._get_index(key)
+        value, trace = self._traceable.get(key, (-1, -1, MISSING_KEY))
+        if trace is INSERTED_KEY:
+            self._traceable[index] = (value, DELETED_KEY)
+
+
+class TraceBatch:
+
+    def __init__(self, tables=None):
+        if not tables:
+            tables = {}
+        self._trace_batch = tables
+
+    @to_tuple
+    def apply(self, db):
+        for key, value in self.pending_items():
+            db[key] = value
+
+    def changed_keys(self):
+        for key, trace_set in self._trace_batch.items():
+            for value, trace in trace_set:
+                if trace is CHANGED_KEY:
+                    yield key
+
+    def changed_items(self):
+        for key, trace_set in self._trace_batch.items():
+            for value, trace in trace_set:
+                if trace is CHANGED_KEY:
+                    yield key, value
+
+    def deleted_keys(self):
+        for key, trace_set in self._trace_batch.items():
+            for value, trace in trace_set:
+                if trace is DELETED_KEY:
+                    yield key
+
+    def deleted_items(self):
+        for key, trace_set in self._trace_batch.items():
+            for value, trace in trace_set:
+                if trace is DELETED_KEY:
+                    yield key, value
+
+    def pending_keys(self):
+        for key, trace_set in self._trace_batch.items():
+            value, trace = trace_set[-1]
+            if trace is INSERTED_KEY:
+                yield key
+            else:
+                raise TraceError(key, trace)
+
+    def pending_items(self):
+        for key, trace_set in self._trace_batch.items():
+            value, trace = trace_set[-1]
+            if trace is INSERTED_KEY:
+                yield key, value
+            else:
+                raise TraceError(key, trace)
 

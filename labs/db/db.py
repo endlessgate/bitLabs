@@ -16,7 +16,9 @@ class DB(BaseDB):
 
     @contextmanager
     def write_batch(self, t=False):
-        return self._db.write_batch(transaction=t)
+        with self._db.write_batch(transaction=t) as db:
+            batch = WriteBatch(self._db, db)
+            yield batch
 
     def __setitem__(self, key: bytes, value: bytes):
         raise_diff_with_bytes(key, value)
@@ -36,14 +38,14 @@ class DB(BaseDB):
 
 class WriteBatch:
     def __init__(self, db, batch):
-        self._base_db = db
+        self._raw_db = db
         self._batch = batch
 
     def __setitem__(self, key, value):
         self._batch.put(key, value)
 
     def __getitem__(self, key):
-        return self._base_db[key]
+        return self._raw_db[key]
 
     def __delitem__(self, key):
         self._batch.delete(key)
