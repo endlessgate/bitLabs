@@ -1,2 +1,2 @@
 asyncio-cancel-token
-cryptography == 2.7
+cryptography == 3.2
